@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}数据统计{% endblock %}
+{% block content %}
+<h2 class="mb-3">数据统计</h2>
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="card p-3 metric-card"><div>今日检测任务数</div><h4 id="cardEvents">0</h4></div></div>
+  <div class="col-md-3"><div class="card p-3 metric-card"><div>今日识别目标总数</div><h4 id="cardObjects">0</h4></div></div>
+  <div class="col-md-3"><div class="card p-3 metric-card"><div>今日在线用户数</div><h4 id="cardUsers">0</h4></div></div>
+  <div class="col-md-3"><div class="card p-3 metric-card"><div>摄像头状态</div><h4><span id="cardCamera" class="status-pill status-offline">离线</span></h4></div></div>
+</div>
+
+<div class="card p-3 mb-3 panel-anim">
+  <div class="row g-2 align-items-end stats-filter-row">
+    <div class="col-xl-2 col-md-4"><label class="form-label">范围</label><select class="form-select" id="rangeType"><option value="today">今日</option><option value="yesterday">昨日</option><option value="7d">近7天</option><option value="30d">近30天</option><option value="custom">自定义</option></select></div>
+    <div class="col-xl-2 col-md-4"><label class="form-label">开始时间</label><input type="datetime-local" step="1" class="form-control" id="startTime"></div>
+    <div class="col-xl-2 col-md-4"><label class="form-label">结束时间</label><input type="datetime-local" step="1" class="form-control" id="endTime"></div>
+    <div class="col-xl-2 col-md-4"><label class="form-label">类别</label><select class="form-select" id="categoryFilter"><option value="">全部类别</option></select></div>
+    <div class="col-xl-4 col-md-8 d-flex gap-2 flex-wrap stats-actions">
+      <button class="btn btn-primary uniform-btn" id="refreshBtn">刷新数据</button>
+      <button class="btn btn-danger uniform-btn" id="clearDataBtn">清空数据</button>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card p-3"><h6>检测数量趋势</h6><div id="lineChart" style="height:340px;"></div><div id="linePlaceholder" class="placeholder-panel d-none"><strong>暂无趋势数据</strong><span>当前没有检测记录。开始检测后将展示按时间变化趋势。</span></div></div></div>
+  <div class="col-lg-6"><div class="card p-3"><h6>类别分布</h6><div id="pieChart" style="height:340px;"></div><div id="piePlaceholder" class="placeholder-panel d-none"><strong>暂无类别分布</strong><span>可先开启摄像头并启动检测，系统将自动汇总占比。</span></div></div></div>
+  <div class="col-12"><div class="card p-3"><h6>各类别置信度动态趋势</h6><div class="small text-muted mb-2">按时间展示不同缺陷类别的平均识别置信度，可缩放查看局部波动。</div><div id="confidenceChart" style="height:380px;"></div><div id="confidencePlaceholder" class="placeholder-panel d-none"><strong>暂无置信度趋势</strong><span>完成检测后，这里会动态展示各类别置信度变化。</span></div></div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/stats.js') }}"></script>
+{% endblock %}

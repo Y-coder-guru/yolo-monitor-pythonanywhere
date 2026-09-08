@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}检测记录{% endblock %}
+{% block content %}
+<h2 class="mb-3">检测记录</h2>
+<div class="card p-3 mb-3 two-column-card history-filter-row">
+  <div>
+    <h6 class="mb-2">筛选区域</h6>
+    <div class="row g-2 align-items-end">
+      <div class="col-xl-4 col-md-6"><label class="form-label">关键词</label><input class="form-control" id="keyword" placeholder="类别/备注"></div>
+      <div class="col-xl-4 col-md-6"><label class="form-label">类别</label><input class="form-control" id="category" placeholder="如 person"></div>
+      <div class="col-xl-4 col-md-6"><label class="form-label">备注</label><input class="form-control" id="note" placeholder="备注关键词"></div>
+      <div class="col-xl-6 col-md-6"><label class="form-label">开始时间</label><input class="form-control" type="datetime-local" step="1" id="startTime"></div>
+      <div class="col-xl-6 col-md-6"><label class="form-label">结束时间</label><input class="form-control" type="datetime-local" step="1" id="endTime"></div>
+      <div class="col-12 d-flex justify-content-between align-items-center flex-wrap mt-1 history-filter-actions">
+        <button class="btn btn-primary uniform-btn" id="searchBtn">筛选</button>
+        <button class="btn btn-outline-secondary uniform-btn" id="resetBtn">重置筛选</button>
+      </div>
+    </div>
+  </div>
+  <div class="export-panel">
+    <h6 class="mb-2">导出区域</h6>
+    <p class="small text-muted mb-2">按当前筛选范围导出检测记录。</p>
+    <div class="d-grid gap-2">
+      <button class="btn btn-outline-secondary uniform-btn" id="exportCsvBtn">导出 CSV</button>
+      <button class="btn btn-outline-secondary uniform-btn" id="exportExcelBtn">导出 Excel</button>
+      <button class="btn btn-outline-secondary uniform-btn" id="exportJsonBtn">导出 JSON</button>
+    </div>
+  </div>
+</div>
+<div class="card p-3">
+  <div class="table-responsive history-table-scroll">
+  <table class="table table-striped align-middle" id="historyTable">
+    <thead><tr><th>ID</th><th>检测时间</th><th>目标类别</th><th>数量</th><th>图像</th><th>操作人</th><th>操作类型</th><th>操作</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  </div>
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <small class="text-muted" id="pageInfo">共 0 条</small>
+    <div class="btn-group">
+      <button class="btn btn-outline-primary uniform-btn" id="prevPage">上一页</button>
+      <button class="btn btn-outline-primary uniform-btn" id="nextPage">下一页</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade history-stable-modal" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-slide">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">记录详情</h5>
+        <button type="button" class="btn-close history-modal-close" aria-label="关闭详情"></button>
+      </div>
+      <div class="modal-body" id="detailBody">加载中...</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade history-stable-modal" id="historyImageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen modal-dialog-centered">
+    <div class="modal-content history-image-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">检测图像放大查看</h5>
+        <button type="button" class="btn-close btn-close-white history-image-modal-close" aria-label="关闭大图"></button>
+      </div>
+      <div class="modal-body d-flex align-items-center justify-content-center">
+        <div class="history-image-zoom-stage" id="historyImageZoomStage">
+          <img id="historyZoomImage" alt="放大的检测图像">
+          <canvas id="historyZoomCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

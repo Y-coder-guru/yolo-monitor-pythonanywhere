@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% set auth_mode = 'login' %}
+{% block title %}登录{% endblock %}
+{% block content %}
+{% include '_auth_stage.html' %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

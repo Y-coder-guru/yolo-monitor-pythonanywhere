@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}实时检测{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="mb-1">实时检测</h2>
+  <span class="badge text-bg-primary">OpenVINO 实时推理</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="video-panel card p-3 panel-anim h-100">
+      <div class="camera-device-panel mb-3">
+        <div class="row g-2 align-items-end mb-2">
+          <div class="col-lg-4">
+            <label class="form-label">采集来源</label>
+            <select class="form-select" id="cameraSourceType">
+              <option value="builtin">电脑内置摄像头</option>
+              <option value="usb">USB 外接摄像头</option>
+              <option value="serial">设备通信模块（串口）</option>
+            </select>
+          </div>
+          <div class="col-lg-8" id="browserCameraPanel">
+            <div class="row g-2 align-items-end">
+              <div class="col-md-7">
+                <label class="form-label">摄像头设备</label>
+                <select class="form-select" id="cameraDeviceSelect">
+                  <option value="">请先授权并扫描摄像头</option>
+                </select>
+              </div>
+              <div class="col-md-5">
+                <button class="btn btn-outline-primary w-100" id="refreshCameraBtn">扫描摄像头</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="serial-device-panel d-none" id="serialDevicePanel">
+          <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+              <label class="form-label">串口设备</label>
+              <select class="form-select" id="serialPortSelect">
+                <option value="">点击扫描串口</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">波特率</label>
+              <select class="form-select" id="serialBaudrate">
+                <option>9600</option>
+                <option>57600</option>
+                <option selected>115200</option>
+                <option>230400</option>
+                <option>460800</option>
+                <option>921600</option>
+              </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+              <button class="btn btn-outline-primary flex-fill" id="scanSerialBtn">扫描</button>
+              <button class="btn btn-primary flex-fill" id="connectSerialBtn">连接</button>
+              <button class="btn btn-outline-danger flex-fill" id="disconnectSerialBtn">断开</button>
+            </div>
+            <div class="col-md-9">
+              <label class="form-label">设备控制指令</label>
+              <input class="form-control" id="serialCommand" placeholder="例如：START、STOP、STATUS">
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-outline-dark w-100" id="sendSerialCommandBtn">发送指令</button>
+            </div>
+          </div>
+          <div class="small text-muted mt-2" id="serialStatusText">
+            未连接。图像协议：设备通过串口连续发送完整 JPEG 二进制帧。
+          </div>
+        </div>
+
+        <div class="camera-device-hint mt-2" id="cameraDeviceHint">
+          浏览器首次访问会请求摄像头权限。
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap mb-3 monitor-actions">
+        <button class="btn btn-primary uniform-btn" id="openCameraBtn">打开采集源</button>
+        <button class="btn btn-outline-secondary uniform-btn" id="closeCameraBtn">关闭采集源</button>
+        <button class="btn btn-success uniform-btn" id="startDetBtn">开始检测</button>
+        <button class="btn btn-outline-danger uniform-btn" id="stopDetBtn">停止检测</button>
+        <button class="btn btn-outline-dark uniform-btn" id="fullscreenBtn">全屏查看</button>
+      </div>
+
+      <div class="video-wrap" id="videoWrap">
+        <video id="video" autoplay playsinline muted></video>
+        <img id="serialImage" class="d-none" alt="串口设备图像">
+        <canvas id="overlay"></canvas>
+        <div class="serial-waiting d-none" id="serialWaiting">等待设备发送 JPEG 图像帧</div>
+        <div class="monitor-hud" aria-hidden="true">
+          <span class="monitor-hud-state" id="monitorHudState"><i></i><b>STANDBY</b></span>
+          <span class="monitor-hud-latency" id="monitorHudLatency">-- ms</span>
+        </div>
+        <div class="monitor-corners" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+
+      <div class="row g-2 mt-2">
+        <div class="col-md-4"><div class="mini-card">今日检测时长：<span id="todayDuration">00:00:00</span></div></div>
+        <div class="col-md-4"><div class="mini-card">今日在线用户：<span id="onlineUsers">0</span></div></div>
+        <div class="col-md-4"><div class="mini-card">采集源状态：<span id="cameraStateMini">离线</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card p-3 panel-anim h-100">
+      <h5 class="mb-2">实时统计与参数</h5>
+      <ul class="list-group mb-3" id="countList">
+        <li class="list-group-item">暂无检测数据</li>
+      </ul>
+      <div class="mini-card-block monitor-status-panel mb-2">
+        <div class="small" id="statusText">状态：待机</div>
+        <div class="small" id="cameraMeta">设备：- | 分辨率：- | 帧率：-</div>
+        <div class="small" id="perfMeta">推理耗时：-</div>
+        <div class="small" id="modelMeta">模型：-（未加载）</div>
+      </div>
+      <hr>
+      <div class="row g-2">
+        <div class="col-6">
+          <label class="form-label small">分辨率</label>
+          <select class="form-select form-select-sm" id="cfgResolution">
+            <option>VGA</option>
+            <option selected>720P</option>
+            <option>1080P</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="form-label small">目标帧率</label>
+          <input type="number" min="1" max="60" class="form-control form-control-sm" id="cfgFps" value="20">
+        </div>
+        <div class="col-6">
+          <div class="form-check form-switch mt-4">
+            <input class="form-check-input" type="checkbox" id="cfgFlipH">
+            <label class="form-check-label" for="cfgFlipH">水平镜像</label>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="form-check form-switch mt-4">
+            <input class="form-check-input" type="checkbox" id="cfgFlipV">
+            <label class="form-check-label" for="cfgFlipV">垂直翻转</label>
+          </div>
+        </div>
+        <div class="col-12">
+          <button class="btn btn-outline-primary w-100 uniform-btn" id="applyCameraCfgBtn">应用采集参数</button>
+        </div>
+      </div>
+      <div class="mini-card-block serial-tip-panel mt-2">
+        <div class="small text-muted">串口视觉设备建议使用 460800 或 921600 波特率，以提高 JPEG 图像传输速度。</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/monitor.js') }}"></script>
+{% endblock %}

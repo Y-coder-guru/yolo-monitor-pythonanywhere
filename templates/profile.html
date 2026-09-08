@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}个人账户{% endblock %}
+{% block content %}
+<h2 class="mb-3">个人账户</h2>
+<div class="row g-3 align-items-stretch profile-row">
+  <div class="col-lg-6">
+    <div class="card p-3 h-100 d-flex flex-column justify-content-center">
+      <h5 class="mb-3">个人信息</h5>
+      <div class="row g-2">
+        <div class="col-md-6"><label class="form-label">用户名</label><input class="form-control" id="pfUsername"></div>
+        <div class="col-md-6"><label class="form-label">邮箱</label><input class="form-control" id="pfEmail"></div>
+        <div class="col-md-6"><label class="form-label">电话</label><input class="form-control" id="pfPhone"></div>
+        <div class="col-md-6"><label class="form-label">头像 URL（网络图片链接）</label><input class="form-control" id="pfAvatar"></div>
+        <div class="col-md-6"><label class="form-label">角色</label><input class="form-control" id="pfRole" disabled></div>
+        <div class="col-md-6"><label class="form-label">用户ID</label><input class="form-control" id="pfId" disabled></div>
+        <div class="col-md-12"><label class="form-label">注册时间</label><input class="form-control" id="pfCreated" disabled></div>
+      </div>
+      <div class="mt-3 d-flex justify-content-center">
+        <button class="btn btn-primary uniform-btn" id="saveProfileBtn">保存个人信息</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card p-3 h-100 d-flex flex-column justify-content-center">
+      <h5 class="mb-3">账号操作</h5>
+      <div class="row g-3 account-action-grid">
+        <div class="col-6"><button class="btn btn-outline-primary w-100" id="changePwdBtn">修改密码</button></div>
+        <div class="col-6"><button class="btn btn-outline-secondary w-100" id="reloginBtn">重新登录</button></div>
+        <div class="col-6"><a class="btn btn-outline-success w-100" href="{{ url_for('register') }}">注册新账号</a></div>
+        <div class="col-6"><button class="btn btn-danger w-100" id="logoutBtn">退出登录</button></div>
+      </div>
+      <p class="small text-muted mt-3 mb-0">提示：重新登录/退出登录会释放当前会话，确保可安全跳转到登录页。</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}

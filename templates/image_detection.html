@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}图片检测{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <div>
+    <h2 class="mb-1">图片检测</h2>
+    <div class="text-muted">上传现场图片，检测坑状缺陷与条状缺陷，并生成智能研判建议</div>
+  </div>
+  <span class="badge text-bg-primary">OpenVINO 图片推理</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-8">
+    <div class="card p-3 panel-anim">
+      <div class="image-drop-zone mb-3" id="imageDropZone">
+        <div>
+          <h5>点击选择或拖拽图片到这里</h5>
+          <div class="text-muted">支持 JPG、PNG、BMP、WebP，单张不超过 12MB</div>
+          <button class="btn btn-primary mt-3" id="chooseImageBtn" type="button">选择图片</button>
+          <input class="d-none" type="file" id="imageInput" accept="image/jpeg,image/png,image/bmp,image/webp">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+          <strong id="imageFileName">尚未选择图片</strong>
+          <span class="text-muted ms-2" id="imageMeta"></span>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success" id="detectImageBtn" disabled>开始图片检测</button>
+          <button class="btn btn-outline-secondary" id="clearImageBtn" disabled>清空</button>
+        </div>
+      </div>
+
+      <div class="image-stage" id="imageStage">
+        <div class="text-secondary" id="imagePlaceholder">检测图片将在这里显示</div>
+        <img id="imagePreview" class="d-none" alt="待检测图片">
+        <canvas id="imageOverlay"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card p-3 panel-anim h-100">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">检测结果</h5>
+        <span class="badge text-bg-secondary" id="detectionCountBadge">0 个区域</span>
+      </div>
+      <div class="small text-muted mb-3" id="imageDetectionStatus">等待上传图片</div>
+      <div id="imageDetectionList">
+        <div class="placeholder-panel" style="min-height: 220px;">
+          <div>暂无检测结果</div>
+          <small>检测后可点击某个区域进行单独研判</small>
+        </div>
+      </div>
+      <div class="mini-card-block mt-auto pt-3">
+        <div class="small" id="imageModelMeta">模型：-</div>
+        <div class="small" id="imagePerfMeta">推理耗时：-</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3 panel-anim mt-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+      <h5 class="mb-1">智能研判</h5>
+      <div class="small text-muted" id="analysisScopeText">检测完成后，可研判全部区域或先点选某个检测框</div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge text-bg-secondary risk-badge" id="riskBadge">未研判</span>
+      <button class="btn btn-primary" id="analyzeBtn" disabled>生成研判与处置方案</button>
+    </div>
+  </div>
+  <div class="analysis-report text-muted" id="analysisReport">
+    智能研判模块将结合缺陷类别、置信度、位置和框选面积，给出缺陷解释、风险等级、复核步骤与应对方案。
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/image_detection.js') }}"></script>
+{% endblock %}

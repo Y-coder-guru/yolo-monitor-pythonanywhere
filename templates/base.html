@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}缺陷检测GUI{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% if current_user.is_authenticated %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium-ui.css') }}">
+  {% endif %}
+</head>
+<body class="{% if request.endpoint in ['login', 'register'] %}auth-page{% endif %}{% if current_user.is_authenticated %} app-page app-page-{{ request.endpoint|replace('_', '-') }}{% endif %}">
+<div class="d-flex" id="layoutWrapper">
+  {% if current_user.is_authenticated %}
+  <aside class="sidebar p-3 page-transition" id="appSidebar">
+    <button class="sidebar-collapse-btn" id="sidebarToggleBtn" type="button" title="收起导航栏" aria-label="收起导航栏">
+      <span class="sidebar-collapse-mark" aria-hidden="true"></span>
+    </button>
+    <h4 class="mb-4 mt-2 sidebar-brand">缺陷检测GUI</h4>
+    <nav class="sidebar-nav">
+      <div class="sidebar-nav-group">
+        <a href="{{ url_for('monitor') }}" data-short="监" class="nav-link {% if request.path.startswith('/monitor') or request.path.startswith('/image-detection') %}active{% endif %}">
+          <span class="nav-text">实时监控</span>
+        </a>
+        <div class="nav-flyout">
+          <div class="nav-flyout-title">检测模式</div>
+          <a href="{{ url_for('monitor') }}" class="nav-flyout-link {% if request.path.startswith('/monitor') %}active{% endif %}">实时检测</a>
+          <a href="{{ url_for('image_detection_page') }}" class="nav-flyout-link {% if request.path.startswith('/image-detection') %}active{% endif %}">图片检测</a>
+        </div>
+      </div>
+      <a href="{{ url_for('stats_page') }}" data-short="统" class="nav-link {% if request.path.startswith('/stats') %}active{% endif %}"><span class="nav-text">数据统计</span></a>
+      <a href="{{ url_for('history_page') }}" data-short="录" class="nav-link {% if request.path.startswith('/history') %}active{% endif %}"><span class="nav-text">检测记录</span></a>
+      {% if current_user.is_admin %}
+      <a href="{{ url_for('admin_page') }}" data-short="设" class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}"><span class="nav-text">系统设置</span></a>
+      {% endif %}
+      <a href="{{ url_for('profile_page') }}" data-short="户" class="nav-link {% if request.path.startswith('/profile') %}active{% endif %}"><span class="nav-text">个人账户</span></a>
+    </nav>
+
+    <div class="sidebar-footer mt-auto pt-3">
+      <div>版本：v2.0.0</div>
+      <div>状态：<span id="sidebarSystemState">运行中</span></div>
+      <div>2026 缺陷检测系统</div>
+    </div>
+  </aside>
+  {% endif %}
+
+  <main class="flex-grow-1 p-3 p-md-4 main-content page-transition {% if request.endpoint in ['login', 'register'] %}auth-main{% endif %}" id="mainContent">
+    {% if not current_user.is_authenticated and request.endpoint not in ['login', 'register'] %}
+    <div class="d-flex justify-content-end gap-2 mb-3">
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('login') }}">登录</a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('register') }}">注册</a>
+    </div>
+    {% endif %}
+    {% if current_user.is_authenticated %}
+    <div class="topbar-meta mb-3">
+      <div class="d-flex align-items-center gap-2 topbar-left">
+        <span class="badge text-bg-dark" id="globalCameraStatus">摄像头状态：未连接</span>
+      </div>
+      <div class="d-flex align-items-center justify-content-center topbar-center">
+        <span class="badge text-bg-light" id="bjClock">--</span>
+      </div>
+      <div class="d-flex align-items-center gap-2 topbar-right">
+        <img id="globalAvatar" class="topbar-avatar" alt="用户头像" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23666ed1'/%3E%3Ccircle cx='32' cy='25' r='10' fill='white' fill-opacity='.9'/%3E%3Cpath d='M14 55c2-11 9-17 18-17s16 6 18 17' fill='white' fill-opacity='.9'/%3E%3C/svg%3E">
+        <span id="globalUserName" class="small fw-semibold text-secondary">当前用户</span>
+      </div>
+    </div>
+    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="关闭提示"
+          onclick="const box=this.closest('.alert');box.classList.add('alert-closing');window.setTimeout(() => box.remove(), 220)"
+        ></button>
+      </div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3"></div>
+{% if current_user.is_authenticated %}
+<script src="{{ url_for('static', filename='js/premium-ui.js') }}"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% if request.endpoint == 'stats_page' %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+{% endif %}
+{% endif %}
+<script>
+function showToast(message, type='success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+  const node = document.createElement('div');
+  node.className = `toast align-items-center text-bg-${type} border-0`;
+  node.id = id;
+  node.innerHTML = `<div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+  container.appendChild(node);
+  if (window.bootstrap?.Toast) {
+    const toast = new bootstrap.Toast(node, {delay: 3000});
+    toast.show();
+    node.addEventListener('hidden.bs.toast', () => node.remove());
+  } else {
+    node.classList.add('show');
+    node.querySelector('button')?.addEventListener('click', () => node.remove());
+    window.setTimeout(() => node.remove(), 3000);
+  }
+}
+
+function handleAuthExpiryResponse(res, data=null) {
+  const expired = res.status === 401 || data?.code === 'SESSION_REPLACED' || data?.code === 'AUTH_INVALID';
+  if (!expired) return false;
+  const target = data?.redirect || '/login';
+  window.location.href = target;
+  return true;
+}
+
+function animateNumber(el, target, duration=700) {
+  const start = Number(el.textContent) || 0;
+  const diff = target - start;
+  const t0 = performance.now();
+  const step = (t) => {
+    const p = Math.min((t - t0) / duration, 1);
+    el.textContent = Math.round(start + diff * p);
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+async function refreshGlobalStatus() {
+  const el = document.getElementById('globalCameraStatus');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/camera/status');
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      if (handleAuthExpiryResponse(res)) return;
+      throw e;
+    }
+    if (handleAuthExpiryResponse(res, data)) return;
+    if (!data.ok) return;
+    const connected = data.status === 'connected';
+    const text = connected ? '已连接' : '离线';
+    const sb = document.getElementById('sidebarSystemState');
+    if (sb) sb.textContent = text;
+    el.textContent = `摄像头状态：${text}`;
+    el.className = `badge ${connected ? 'text-bg-success' : 'text-bg-secondary'}`;
+  } catch (e) {
+    el.textContent = '摄像头状态：离线';
+    el.className = 'badge text-bg-secondary';
+  }
+}
+
+
+function buildAvatarDataUri(name='U') {
+  const txt = (name || 'U').slice(0, 2).toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="#4f46e5"/><text x="50%" y="54%" text-anchor="middle" font-size="24" fill="#fff" font-family="Arial">${txt}</text></svg>`;
+  return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
+}
+
+async function refreshGlobalAvatar() {
+  const el = document.getElementById('globalAvatar');
+  const nameEl = document.getElementById('globalUserName');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/account/me');
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (e) {
+      if (handleAuthExpiryResponse(res)) return;
+      throw e;
+    }
+    if (handleAuthExpiryResponse(res, data)) return;
+    if (!data.ok) return;
+    const username = data.user?.username || '用户';
+    const avatar = data.user?.avatar_url || buildAvatarDataUri(username);
+    el.src = avatar;
+    if (nameEl) nameEl.textContent = username;
+  } catch (e) {
+    el.src = buildAvatarDataUri('U');
+  }
+}
+
+function startBjClock() {
+  const el = document.getElementById('bjClock');
+  if (!el) return;
+  const week = ['日', '一', '二', '三', '四', '五', '六'];
+  const tick = () => {
+    const now = new Date();
+    const bj = new Date(now.getTime() + (8 * 60 + now.getTimezoneOffset()) * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const s = `${bj.getFullYear()}-${pad(bj.getMonth()+1)}-${pad(bj.getDate())} ${pad(bj.getHours())}:${pad(bj.getMinutes())}:${pad(bj.getSeconds())} 星期${week[bj.getDay()]}`;
+    el.textContent = s;
+  };
+  tick();
+  setInterval(tick, 1000);
+}
+
+function initSidebarToggle() {
+  const button = document.getElementById('sidebarToggleBtn');
+  const wrapper = document.getElementById('layoutWrapper');
+  if (!button || !wrapper) return;
+
+  const syncState = () => {
+    const collapsed = wrapper.classList.contains('sidebar-collapsed');
+    const label = collapsed ? '展开导航栏' : '收起导航栏';
+    button.title = label;
+    button.setAttribute('aria-label', label);
+  };
+
+  if (localStorage.getItem('sidebar-collapsed') === '1' && window.innerWidth > 768) {
+    wrapper.classList.add('sidebar-collapsed');
+  }
+  syncState();
+  button.onclick = () => {
+    wrapper.classList.toggle('sidebar-collapsed');
+    localStorage.setItem(
+      'sidebar-collapsed',
+      wrapper.classList.contains('sidebar-collapsed') ? '1' : '0',
+    );
+    syncState();
+  };
+}
+
+
+startBjClock();
+refreshGlobalStatus();
+refreshGlobalAvatar();
+initSidebarToggle();
+setInterval(refreshGlobalStatus, 3000);
+setInterval(refreshGlobalAvatar, 10000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

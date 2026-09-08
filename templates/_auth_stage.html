@@ -1,0 +1,171 @@
+<section class="auth-stage {% if auth_mode == 'register' %}is-register{% endif %}" id="authStage" data-initial-mode="{{ auth_mode }}">
+  <div class="auth-shell">
+    <section class="auth-story" aria-label="欢迎区域">
+      <div class="auth-brand-line">
+        <span class="auth-brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <span>VISION SENTINEL</span>
+      </div>
+
+      <div class="auth-copy">
+        <span class="auth-eyebrow" id="authGreeting">下午好，欢迎回来</span>
+        <h1>让每一次检测，<br><em>都更清晰从容。</em></h1>
+        <p>登录你的缺陷检测工作台，继续管理设备、模型与检测记录。</p>
+      </div>
+
+      <div class="shape-world" id="shapeWorld" aria-hidden="true">
+        <div class="shape-caption">
+          <span id="shapeMessage">我们正在安静等候</span>
+        </div>
+
+        <div class="shape-character shape-character-bar">
+          <span class="shape-body">
+            <span class="shape-eyes">
+              <i class="shape-eye"><b></b></i>
+              <i class="shape-eye"><b></b></i>
+            </span>
+          </span>
+          <span class="shape-ground"></span>
+        </div>
+
+        <div class="shape-character shape-character-circle">
+          <span class="shape-body">
+            <span class="shape-eyes">
+              <i class="shape-eye"><b></b></i>
+              <i class="shape-eye"><b></b></i>
+            </span>
+          </span>
+          <span class="shape-ground"></span>
+        </div>
+
+        <div class="shape-character shape-character-square">
+          <span class="shape-body">
+            <span class="shape-eyes">
+              <i class="shape-eye"><b></b></i>
+              <i class="shape-eye"><b></b></i>
+            </span>
+          </span>
+          <span class="shape-ground"></span>
+        </div>
+
+        <span class="shape-floor"></span>
+      </div>
+
+      <div class="auth-story-foot">
+        <span><i class="status-light"></i> 本地模型服务就绪</span>
+        <span>YOLO · OpenVINO</span>
+      </div>
+    </section>
+
+    <section class="auth-card-zone">
+      <div class="auth-flip-wrap">
+        <div class="auth-flip-card" id="authFlipCard">
+          <article class="auth-face auth-face-login" aria-hidden="{% if auth_mode == 'register' %}true{% else %}false{% endif %}">
+            <div class="auth-face-content">
+              <header class="auth-form-head">
+                <span class="auth-mobile-mark">VS</span>
+                <span class="auth-form-kicker">ACCOUNT ACCESS</span>
+                <h2>欢迎回来</h2>
+                <p>输入账号信息，继续你的检测任务。</p>
+              </header>
+
+              <form method="post" action="{{ url_for('login') }}" class="auth-form" id="loginForm">
+                <label class="auth-field">
+                  <span>用户名</span>
+                  <span class="auth-input-wrap">
+                    <i class="auth-field-icon" aria-hidden="true">⌁</i>
+                    <input type="text" name="username" autocomplete="username" placeholder="请输入用户名" required>
+                  </span>
+                </label>
+
+                <label class="auth-field">
+                  <span>密码</span>
+                  <span class="auth-input-wrap">
+                    <i class="auth-field-icon auth-lock-icon" aria-hidden="true"></i>
+                    <input type="password" name="password" autocomplete="current-password" placeholder="请输入密码" required data-password-input>
+                    <button type="button" class="password-toggle" aria-label="显示密码" data-password-toggle>
+                      <span></span>
+                    </button>
+                  </span>
+                </label>
+
+                <div class="auth-form-row">
+                  <label class="auth-check">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span></span>
+                    下次自动登录
+                  </label>
+                  <button type="button" class="auth-forgot-link" data-forgot-password>忘记密码？</button>
+                </div>
+
+                <button class="auth-submit" type="submit">
+                  <span>进入工作台</span>
+                  <i aria-hidden="true">↗</i>
+                </button>
+              </form>
+
+              <button class="auth-mode-switch" type="button" data-auth-mode="register" aria-label="切换到注册">
+                <b>创建账户</b>
+                <i aria-hidden="true">↻</i>
+              </button>
+            </div>
+          </article>
+
+          <article class="auth-face auth-face-register" aria-hidden="{% if auth_mode == 'register' %}false{% else %}true{% endif %}">
+            <div class="auth-face-content">
+              <header class="auth-form-head">
+                <span class="auth-mobile-mark">VS</span>
+                <span class="auth-form-kicker">NEW OPERATOR</span>
+                <h2>创建账号</h2>
+                <p>建立属于你的设备设置与检测记录空间。</p>
+              </header>
+
+              <form method="post" action="{{ url_for('register') }}" class="auth-form" id="registerForm">
+                <label class="auth-field">
+                  <span>用户名</span>
+                  <span class="auth-input-wrap">
+                    <i class="auth-field-icon" aria-hidden="true">⌁</i>
+                    <input type="text" name="username" autocomplete="username" placeholder="设置你的用户名" required>
+                  </span>
+                </label>
+
+                <label class="auth-field">
+                  <span>密码</span>
+                  <span class="auth-input-wrap">
+                    <i class="auth-field-icon auth-lock-icon" aria-hidden="true"></i>
+                    <input type="password" name="password" autocomplete="new-password" placeholder="至少 6 位字符" required minlength="6" data-password-input>
+                    <button type="button" class="password-toggle" aria-label="显示密码" data-password-toggle>
+                      <span></span>
+                    </button>
+                  </span>
+                </label>
+
+                <label class="auth-field">
+                  <span>确认密码</span>
+                  <span class="auth-input-wrap">
+                    <i class="auth-field-icon auth-lock-icon" aria-hidden="true"></i>
+                    <input type="password" name="confirm_password" autocomplete="new-password" placeholder="再次输入密码" required minlength="6" data-password-input>
+                    <button type="button" class="password-toggle" aria-label="显示密码" data-password-toggle>
+                      <span></span>
+                    </button>
+                  </span>
+                </label>
+
+                <button class="auth-submit auth-submit-register" type="submit">
+                  <span>完成注册</span>
+                  <i aria-hidden="true">＋</i>
+                </button>
+              </form>
+
+              <button class="auth-mode-switch" type="button" data-auth-mode="login" aria-label="切换到登录">
+                <b>返回登录</b>
+                <i aria-hidden="true">↻</i>
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>

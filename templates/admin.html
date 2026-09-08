@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}管理员{% endblock %}
+{% block content %}
+<h2 class="mb-3">系统设置</h2>
+<div class="row g-3 mb-2">
+  <div class="col-lg-3 col-md-6"><div class="card p-3 metric-card"><div>用户总数</div><h4 id="mUser">0</h4></div></div>
+  <div class="col-lg-3 col-md-6"><div class="card p-3 metric-card"><div>累计检测记录</div><h4 id="mHistory">0</h4><small class="text-muted" id="mHistoryDesc">累计检测记录=累计检测记录条数</small></div></div>
+  <div class="col-lg-3 col-md-6"><div class="card p-3 metric-card"><div>摄像头状态</div><h4><span id="mCamera" class="status-pill status-offline">离线</span></h4></div></div>
+  <div class="col-lg-3 col-md-6"><div class="card p-3 metric-card"><div>今日日志量</div><h4 id="mLogs">0</h4></div></div>
+</div>
+
+<div class="card p-3 mt-3 panel-anim">
+  <h5>浏览器摄像头默认配置</h5>
+  <div class="small text-muted mb-2">实时检测页可在电脑内置摄像头和 USB 外接摄像头之间切换；这里设置默认画面参数。</div>
+  <div class="row g-2 align-items-end">
+    <div class="col-md-3"><label class="form-label">分辨率</label><select class="form-select" id="cfgRes"><option>VGA</option><option>720P</option><option>1080P</option></select></div>
+    <div class="col-md-3"><label class="form-label">目标帧率</label><input class="form-control" type="number" min="1" max="60" id="cfgFps" value="20"></div>
+    <div class="col-md-2 form-check mt-4"><input class="form-check-input" type="checkbox" id="cfgFlipH"><label class="form-check-label" for="cfgFlipH">水平翻转</label></div>
+    <div class="col-md-2 form-check mt-4"><input class="form-check-input" type="checkbox" id="cfgFlipV"><label class="form-check-label" for="cfgFlipV">垂直翻转</label></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100" id="saveCameraCfg">保存配置</button></div>
+  </div>
+</div>
+
+<div class="row g-3 mt-4">
+  <div class="col-lg-5" id="userManageSection">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 admin-panel-header">
+        <h5 class="mb-0">用户管理</h5>
+        <button class="btn btn-sm btn-primary" id="openCreateUser">创建用户</button>
+      </div>
+      <ul class="list-group admin-scroll-list" id="userList"></ul>
+      <div id="userEmpty" class="small text-muted mt-2 d-none">暂无用户数据</div>
+      <div class="admin-pagination mt-2">
+        <button class="btn btn-sm btn-outline-secondary" id="prevUserPage">上一页</button>
+        <span class="admin-page-info" id="userPageInfo">第 1 / 1 页</span>
+        <button class="btn btn-sm btn-outline-secondary" id="nextUserPage">下一页</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap admin-panel-header">
+        <h5 class="mb-0">系统日志</h5>
+        <input id="logOperator" class="form-control form-control-sm operator-filter" placeholder="按操作人筛选">
+      </div>
+      <ul class="list-group log-scroll" id="logList"></ul>
+      <div class="admin-pagination mt-2">
+        <button class="btn btn-sm btn-outline-secondary" id="prevLogPage">上一页</button>
+        <span class="admin-page-info" id="logPageInfo">第 1 / 1 页</span>
+        <button class="btn btn-sm btn-outline-secondary" id="nextLogPage">下一页</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
